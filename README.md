@@ -1,56 +1,82 @@
-# Nerotek01
+<h1 align="center">Nerotek01</h1>
+<p align="center"><em>Java engineer · Minecraft infrastructure · Founder of <a href="https://hypeland.org/">Hypeland</a></em></p>
 
-> Java engineer building production-grade Minecraft infrastructure. Founder of Hypeland.
-
-I am a Java developer focused on server-side Minecraft architecture, low-level NMS optimization, and systems that hold up under concurrent load. My work lives where clean code and fast code meet — performance is treated as a feature, not an afterthought.
-
----
-
-## Focus
-
-- **Java** as primary stack (Java 8 → 21), with deep work at the `net.minecraft.server` layer
-- **Minecraft 1.8.8** (Spigot / Paper) — the version competitive networks are built on
-- **Async-first architecture** — database I/O never touches the main thread
-- **Exploit-aware engineering** — systems designed against the breakage patterns I know exist
-
-I also work in Kotlin, Python, TypeScript, Go, Rust, C++, and SQL — each applied where it provides a real advantage.
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
+  <img src="https://img.shields.io/badge/Focus-NMS%20%26%20Async-4A90D9?style=flat-square" alt="Focus"/>
+  <img src="https://img.shields.io/badge/Target-1.8.8%20Spigot%20%2F%20Paper-7B68EE?style=flat-square" alt="Target"/>
+  <img src="https://img.shields.io/badge/Status-Available%20for%20work-2EA44F?style=flat-square" alt="Status"/>
+</p>
 
 ---
 
-## Selected Work
+### About
 
-### BedWars
+I am a Java developer who works where server internals, concurrency, and latency intersect. My specialty is the `net.minecraft.server` layer — packet interception, custom entity registration, TNT physics overrides, and low-level hooks that only make sense when you control the exact server version underneath them.
 
-A monolithic BedWars plugin for Minecraft 1.8.8, engineered from the ground up for networks that cannot afford downtime. A single JAR ships 33+ integrated add-ons, a native ranked system with ELO and WebSocket matchmaking, a companion BedWarsProxy plugin for BungeeCord / Velocity, and a zero-allocation replay engine.
+I treat performance as a design constraint, not a tuning phase. The systems I ship are built to hold thousands of concurrent players without dipping from 20 TPS, and to run for weeks without a restart. Async-first architecture, thread-isolated storage, and zero-allocation hot paths are the baseline, not the optimization.
 
-Battle-tested with **2,000+ concurrent players** at a stable **19.5+ TPS**. Instant map resets via SlimeWorldManager. Asynchronous MongoDB + Redis + SQLite storage layer with auto-fallback.
-
-Live demo: `mc.hypeland.org`
-
-### Hypeland
-
-A production Minecraft network built as a reference deployment. The website is a Next.js + TypeScript SPA with strict CSP and dark mode. Every layer of the infrastructure — proxy, game servers, frontend — runs under direct control.
+On the side, I read exploits the way some people read documentation. Understanding how a system breaks is the only honest way to build one that does not.
 
 ---
 
-## Engineering Principles
+### Tech Stack
 
-- **Performance is a first-class feature.** Generators are batch-scheduled, listeners register only when their feature is enabled, scoreboards rebuild only on data change.
-- **Stability over feature count.** Arenas use `ConcurrentHashMap` with explicit lifecycle cleanup; servers run for weeks without restart or memory leak.
-- **Single-version depth over cross-version compromise.** Deep NMS hooks are impossible to maintain across versions — so each version gets its own optimized branch.
+<p>
+  <img src="https://img.shields.io/badge/Java-Expert-ED8B00?style=flat-square&logo=openjdk&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Kotlin-Advanced-7F52FF?style=flat-square&logo=kotlin&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Python-Advanced-3776AB?style=flat-square&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/TypeScript-Advanced-3178C6?style=flat-square&logo=typescript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Go-Proficient-00ADD8?style=flat-square&logo=go&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Rust-Proficient-000000?style=flat-square&logo=rust&logoColor=white"/>
+  <img src="https://img.shields.io/badge/C%2B%2B-Proficient-00599C?style=flat-square&logo=c%2B%2B&logoColor=white"/>
+  <img src="https://img.shields.io/badge/SQL-Advanced-4479A1?style=flat-square&logo=postgresql&logoColor=white"/>
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Spigot%20%2F%20Paper-1.8.8-7B68EE?style=flat-square"/>
+  <img src="https://img.shields.io/badge/BungeeCord-2DA67B?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Velocity-1B1B1B?style=flat-square"/>
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white"/>
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white"/>
+</p>
 
 ---
 
-## Activity
+### How I Work
 
-- 130 contributions in the last year
-- BedWars actively developed — 17 commits in 2 days, current release v2.5.3
-- Public repositories: [BedWars](https://github.com/Nerotek01/BedWars), [Nerotek01](https://github.com/Nerotek01)
+| Principle | In practice |
+|---|---|
+| **Async by default** | Storage, network, and replay I/O run on dedicated pools — the main thread never waits. |
+| **Single-version depth** | One Minecraft version means one test surface. NMS hooks stay precise; nothing is layered behind a compatibility shim. |
+| **Exploit-aware design** | Listeners register only for active features. Collections use `ConcurrentHashMap` with explicit cleanup. Hot paths are allocation-free. |
+| **Stability over scope** | A server should not need a restart for weeks. Memory leaks and TPS drift are treated as bugs, not background noise. |
 
 ---
 
-## Contact
+### Notable Work
 
-- **GitHub:** [@Nerotek01](https://github.com/Nerotek01)
-- **Website:** [hypeland.org](https://hypeland.org/)
-- **Demo server:** `mc.hypeland.org`
+- **BedWars** — a production-grade plugin for 1.8.8 networks, battle-tested at 2,000+ concurrent players. See [Nerotek01/BedWars](https://github.com/Nerotek01/BedWars).
+- **Hypeland** — my reference deployment, where every change is validated under real load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/) and `mc.hypeland.org`.
+
+---
+
+### GitHub Activity
+
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=Nerotek01&show_icons=true&hide_border=true&theme=dark&count_private=true" alt="Nerotek01 GitHub stats" width="48%"/>
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=Nerotek01&layout=compact&hide_border=true&theme=dark" alt="Top languages" width="48%"/>
+</p>
+
+---
+
+### Contact
+
+<p>
+  <a href="https://github.com/Nerotek01"><img src="https://img.shields.io/badge/GitHub-Nerotek01-181717?style=flat-square&logo=github&logoColor=white"/></a>
+  <a href="https://hypeland.org/"><img src="https://img.shields.io/badge/Web-hypeland.org-2EA44F?style=flat-square&logo=googlechrome&logoColor=white"/></a>
+  <img src="https://img.shields.io/badge/Minecraft-mc.hypeland.org-7B68EE?style=flat-square&logo=minecraft&logoColor=white"/>
+</p>
