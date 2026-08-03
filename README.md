@@ -25,116 +25,96 @@ On the side, I read exploits the way some people read documentation. Understandi
 
 ### Architecture (Single-version, Async-first)
 
-```mermaid
-flowchart LR
-  Clients["Players - Minecraft Client 1.8.8"]
-  Staff["Staff - Moderation Client"]
-  Web["Web / Panel - hypeland.org"]
-
-  Proxy["Proxy Layer - BungeeCord / Velocity"]
-  API["Backend API - REST / WebSocket"]
-
-  subgraph CONTROL["Control Plane"]
-    Auth["Auth & Sessions"]
-    Perms["Permissions"]
-    Match["Matchmaker"]
-    Config["Config Service"]
-    Punish["Punishments"]
-    Audit["Audit Stream"]
-  end
-
-  subgraph GAME["Game Plane - Spigot/Paper 1.8.8"]
-    LobbyNetty["Lobby Netty I/O"]
-    LobbyMain["Lobby Main Thread - 20 TPS"]
-    LobbyPlugins["Lobby Gameplay"]
-    LobbyNMS["Lobby NMS Hooks"]
-
-    ShardNetty["Shard Netty I/O"]
-    ShardMain["Shard Main Thread - 20 TPS"]
-    ShardLogic["Shard Game Logic"]
-    ShardNMS["Shard NMS Hooks"]
-  end
-
-  subgraph SECURITY["Exploit-aware Layer"]
-    PacketFilters["Packet Filters"]
-    Signals["Anti-cheat Signals"]
-  end
-
-  subgraph ASYNC["Async Layer"]
-    Pools["Executors"]
-    Storage["Storage Services"]
-    Messaging["Messaging"]
-    Replay["Replay / Match Audit"]
-  end
-
-  subgraph DATA["Data Plane"]
-    Redis[("Redis")]
-    DB[("MongoDB / SQL")]
-    SWM[("SlimeWorldManager")]
-    Files[("File Store")]
-  end
-
-  subgraph OBS["Observability"]
-    Metrics["Metrics"]
-    Logs["Logs"]
-    Alerts["Alerts"]
-  end
-
-  Clients --> Proxy
-  Staff --> Proxy
-  Web --> API
-
-  API --> Auth
-  API --> Perms
-  API --> Match
-  API --> Config
-  API --> Punish
-  API --> Audit
-
-  Proxy --> Match
-  Match --> Proxy
-  Proxy --> Auth
-
-  Proxy --> LobbyMain
-  Proxy --> ShardMain
-
-  LobbyMain --> LobbyPlugins --> LobbyNMS
-  LobbyNetty --> LobbyNMS
-
-  ShardMain --> ShardLogic --> ShardNMS
-  ShardNetty --> ShardNMS
-
-  LobbyNMS --> PacketFilters
-  ShardNMS --> PacketFilters
-  PacketFilters --> Signals
-  Signals --> Punish
-
-  LobbyMain -->|"enqueue"| Pools
-  ShardMain -->|"enqueue"| Pools
-
-  Pools --> Storage
-  Pools --> Messaging
-  Pools --> Replay
-
-  Storage --> Redis
-  Storage --> DB
-  Storage --> SWM
-  Messaging --> Redis
-  Replay --> Files
-
-  Storage -->|"safe callback"| LobbyMain
-  Storage -->|"safe callback"| ShardMain
-  Replay -->|"safe callback"| ShardMain
-
-  LobbyMain --> Metrics
-  ShardMain --> Metrics
-  Pools --> Metrics
-
-  API --> Logs
-  LobbyMain --> Logs
-  ShardMain --> Logs
-
-  Metrics --> Alerts
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              ENTRY POINTS                                   │
+│                                                                             │
+│   Players ──┐                                                               │
+│   Staff ────┼──▶ Proxy Layer (BungeeCord / Velocity) ──▶ Auth & Sessions  │
+│   Web ──────┼──▶ Backend API (REST / WebSocket)                             │
+│             │                                                               │
+└─────────────┼───────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          CONTROL PLANE                                      │
+│                                                                             │
+│   Auth & Sessions ── Permissions ── Matchmaker ── Config Service            │
+│        │                                    │                  │             │
+│        ▼                                    ▼                  ▼             │
+│   IP Rules / Tokens              Queue / Party / Routing   Feature Flags   │
+│                                                  │                          │
+│   Punishments ◀── Anti-cheat Signals            │                          │
+│   Audit Stream ◀── Security Events              │                          │
+│                                                  │                          │
+└──────────────────────────────────────────────────┼──────────────────────────┘
+                                                   │
+                                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     GAME PLANE (Spigot/Paper 1.8.8)                         │
+│                                                                             │
+│   ┌─────────────────────────────┐   ┌─────────────────────────────────┐    │
+│   │       LOBBY SERVERS          │   │      GAME SHARDS (BedWars)      │    │
+│   │                              │   │                                  │    │
+│   │   Netty I/O ◀──▶ NMS Hooks  │   │   Netty I/O ◀──▶ NMS Hooks     │    │
+│   │        │              │      │   │        │              │          │    │
+│   │        ▼              ▼      │   │        ▼              ▼          │    │
+│   │   Main Thread ── Gameplay   │   │   Main Thread ── Game Logic     │    │
+│   │   (20 TPS tick)  (hub/cos)  │   │   (20 TPS tick)  (teams/score) │    │
+│   │                              │   │                                  │    │
+│   └─────────────────────────────┘   └─────────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+              │                                    │
+              │  ┌──────────────────────────────┐  │
+              │  │   EXPLOIT-AWARE LAYER         │  │
+              │  │                               │  │
+              │  │   Packet Filters ──▶ Signals  │  │
+              │  │   (sanity, rate limits)        │  │
+              │  │            │                   │  │
+              │  │            ▼                   │  │
+              │  │   ──▶ Punishments              │  │
+              │  │                               │  │
+              │  └──────────────────────────────┘  │
+              │                                    │
+              ▼ enqueue                            ▼ enqueue
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ASYNC LAYER (off-main thread)                        │
+│                                                                             │
+│   Executors (fixed pools, CF pipelines)                                     │
+│        │                                                                    │
+│        ├──▶ Storage Services ──▶ Redis / MongoDB / SQL / SlimeWorldManager  │
+│        │                          │              safe callback ▲              │
+│        │                          └──────────────────────────┘              │
+│        ├──▶ Messaging (fanout, pubsub) ──▶ Redis                            │
+│        │                                                                    │
+│        └──▶ Replay / Match Audit I/O ──▶ File Store                        │
+│                                           safe callback ▲                   │
+│                                    ────────────────────┘                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           DATA PLANE                                        │
+│                                                                             │
+│   ┌──────────┐  ┌──────────────┐  ┌──────────────────┐  ┌────────────┐    │
+│   │  Redis   │  │ MongoDB/SQL  │  │ SlimeWorldManager│  │ File Store │    │
+│   │ cache    │  │ profiles     │  │ world templates  │  │ replays    │    │
+│   │ pubsub   │  │ stats        │  │ blobs            │  │ exports    │    │
+│   │ locks    │  │ economy      │  │                  │  │            │    │
+│   └──────────┘  └──────────────┘  └──────────────────┘  └────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         OBSERVABILITY                                        │
+│                                                                             │
+│   Metrics (TPS, latency, pool saturation) ──▶ Alerts (thresholds, paging)  │
+│   Logs (structured, rotation)                                                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
