@@ -1,6 +1,4 @@
-این متن را دقیقاً داخل فایل `README.md` قرار بده (همه‌ی چیزی که داخل کادر است را کپی کن):
-
-````text
+text
 <h1 align="center">Nerotek01</h1>
 
 <p align="center">
@@ -247,4 +245,3 @@ flowchart LR
   </a>
   <img src="https://img.shields.io/badge/Minecraft-mc.hypeland.org-7B68EE?style=flat-square&logo=minecraft&logoColor=white"/>
 </p>
-````
