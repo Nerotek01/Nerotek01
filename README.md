@@ -1,3 +1,4 @@
+````md
 <h1 align="center">Nerotek01</h1>
 
 <p align="center">
@@ -23,40 +24,153 @@ On the side, I read exploits the way some people read documentation. Understandi
 
 ---
 
-### Architecture
+### Architecture (Single-version, Async-first)
 
 ```mermaid
 flowchart LR
-    proxy["Proxy: BungeeCord / Velocity"]
+  %% =========================
+  %% Edge
+  %% =========================
+  clients["Players\nMinecraft Client 1.8.8"]
+  staff["Staff\nModeration Client"]
+  web["Web / Panel\nhypeland.org"]
 
-    subgraph serverRuntime["Spigot/Paper 1.8.8 Runtime"]
-        direction TB
-        mainThread["Main Thread: 20 TPS"]
-        nmsLayer["NMS Layer: packets, entities, physics"]
-        mainThread --> nmsLayer
+  clients --> proxy
+  staff --> proxy
+  web --> api
+
+  proxy["Proxy Layer\nBungeeCord / Velocity"]
+  api["Backend API\nREST, WebSocket"]
+
+  %% =========================
+  %% Control Plane
+  %% =========================
+  subgraph control["Control Plane (routing, identity, rules)"]
+    direction TB
+    auth["Auth and Sessions\nlogin, tokens, ip rules"]
+    perms["Permissions\nranks, groups"]
+    mm["Matchmaker\nqueue, party, server selection"]
+    cfg["Config Service\nfeature flags, runtime toggles"]
+    punish["Punishments\nban, mute, blacklist"]
+    audit["Audit Stream\nsecurity events"]
+
+    api --> auth
+    api --> perms
+    api --> mm
+    api --> cfg
+    api --> punish
+    api --> audit
+
+    proxy <--> mm
+    proxy --> auth
+  end
+
+  %% =========================
+  %% Game Plane
+  %% =========================
+  subgraph game["Game Plane (Spigot/Paper 1.8.8)"]
+    direction LR
+
+    subgraph lobby["Lobby Servers"]
+      direction TB
+      l_netty["Netty I/O\npacket ingress/egress"]
+      l_main["Main Thread\n20 TPS tick"]
+      l_nms["NMS Hooks\npackets, entities, physics"]
+      l_plugins["Gameplay\ncosmetics, hub features"]
+
+      l_netty --> l_nms
+      l_main --> l_plugins
+      l_plugins --> l_nms
     end
 
-    subgraph asyncWorkers["Async Workers"]
-        direction TB
-        storage["Storage I/O"]
-        network["Network and replay I/O"]
-        cache["Thread-isolated cache"]
+    subgraph shards["Game Shards (e.g., BedWars)"]
+      direction TB
+      g_netty["Netty I/O\npacket ingress/egress"]
+      g_main["Main Thread\n20 TPS tick"]
+      g_nms["NMS Hooks\ncombat, kb, TNT, packets"]
+      g_game["Game Logic\nmatches, teams, scoring"]
+
+      g_netty --> g_nms
+      g_main --> g_game
+      g_game --> g_nms
     end
+  end
 
-    database["MongoDB / SQL"]
-    redis["Redis"]
+  proxy --> lobby
+  proxy --> shards
 
-    proxy --> mainThread
+  %% =========================
+  %% Security / Exploit Layer
+  %% =========================
+  subgraph sec["Exploit-aware Layer (hot-path safe)"]
+    direction TB
+    pkt["Packet Filters\nrate limits, sanity checks"]
+    ac["Anti-cheat Signals\nheuristics, flags"]
+  end
 
-    mainThread -->|"async work"| storage
-    mainThread -->|"async work"| network
-    mainThread -->|"async work"| cache
+  l_nms --> pkt
+  g_nms --> pkt
+  pkt --> ac
+  ac --> punish
 
-    storage --> database
-    cache --> redis
+  %% =========================
+  %% Async Layer (off-main)
+  %% =========================
+  subgraph async["Async Layer (off-main thread)"]
+    direction TB
+    pools["Executors\nfixed pools, CF pipelines"]
+    storage["Storage Services\nDAOs, repositories"]
+    replay["Replay / Match Audit I/O\nstream writer"]
+    bus["Messaging\npubsub, fanout"]
+    pools --> storage
+    pools --> replay
+    pools --> bus
+  end
 
-    storage -->|"safe callback"| mainThread
-    network -->|"safe callback"| mainThread
+  l_main -->|"enqueue work"| pools
+  g_main -->|"enqueue work"| pools
+
+  %% callbacks are controlled handoffs back to main thread
+  storage -->|"safe callback"| l_main
+  storage -->|"safe callback"| g_main
+  replay -->|"safe callback"| g_main
+
+  %% =========================
+  %% Data Plane
+  %% =========================
+  subgraph data["Data Plane"]
+    direction TB
+    redis[("Redis\ncache, pubsub, locks")]
+    db[("MongoDB / SQL\nprofiles, stats, economy")]
+    swm[("SlimeWorldManager\nworld templates, blobs")]
+    files[("File Store\nreplays, exports")]
+  end
+
+  storage --> db
+  storage --> redis
+  storage --> swm
+  replay --> files
+  bus --> redis
+
+  %% =========================
+  %% Observability
+  %% =========================
+  subgraph obs["Observability"]
+    direction TB
+    metrics["Metrics\nTPS, latency, pool saturation"]
+    logs["Logs\nstructured, rotation"]
+    alerts["Alerts\nthresholds, paging"]
+  end
+
+  l_main --> metrics
+  g_main --> metrics
+  pools --> metrics
+
+  l_main --> logs
+  g_main --> logs
+  api --> logs
+
+  metrics --> alerts
 ```
 
 ---
@@ -130,7 +244,7 @@ flowchart LR
 |---|---|
 | Async by default | Storage, network, and replay I/O run on dedicated pools — the main thread never waits. |
 | Single-version depth | One Minecraft version means one test surface. NMS hooks stay precise; nothing is layered behind a compatibility shim. |
-| Exploit-aware design | Listeners register only for active features. Collections use ConcurrentHashMap with explicit cleanup. Hot paths are allocation-free. |
+| Exploit-aware design | Listeners register only for active features. Collections use `ConcurrentHashMap` with explicit cleanup. Hot paths are allocation-free. |
 | Stability over scope | A server should not need a restart for weeks. Memory leaks and TPS drift are treated as bugs, not background noise. |
 
 ---
@@ -153,3 +267,4 @@ flowchart LR
   </a>
   <img src="https://img.shields.io/badge/Minecraft-mc.hypeland.org-7B68EE?style=flat-square&logo=minecraft&logoColor=white"/>
 </p>
+````
