@@ -23,7 +23,6 @@ On the side, I read exploits the way some people read documentation. Understandi
 
 ### Architecture (Single-version, Async-first)
 
-```mermaid
 flowchart LR
   P[Proxy<br/>BungeeCord / Velocity] --> S[Spigot/Paper 1.8.8]
 
