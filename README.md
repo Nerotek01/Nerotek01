@@ -1,4 +1,3 @@
-text
 <h1 align="center">Nerotek01</h1>
 
 <p align="center">
