@@ -23,99 +23,46 @@ On the side, I read exploits the way some people read documentation. Understandi
 
 ---
 
-### Architecture (Single-version, Async-first)
+### System Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              ENTRY POINTS                                   │
-│                                                                             │
-│   Players ──┐                                                               │
-│   Staff ────┼──▶ Proxy Layer (BungeeCord / Velocity) ──▶ Auth & Sessions  │
-│   Web ──────┼──▶ Backend API (REST / WebSocket)                             │
-│             │                                                               │
-└─────────────┼───────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          CONTROL PLANE                                      │
-│                                                                             │
-│   Auth & Sessions ── Permissions ── Matchmaker ── Config Service            │
-│        │                                    │                  │             │
-│        ▼                                    ▼                  ▼             │
-│   IP Rules / Tokens              Queue / Party / Routing   Feature Flags   │
-│                                                  │                          │
-│   Punishments ◀── Anti-cheat Signals            │                          │
-│   Audit Stream ◀── Security Events              │                          │
-│                                                  │                          │
-└──────────────────────────────────────────────────┼──────────────────────────┘
-                                                   │
-                                                   ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     GAME PLANE (Spigot/Paper 1.8.8)                         │
-│                                                                             │
-│   ┌─────────────────────────────┐   ┌─────────────────────────────────┐    │
-│   │       LOBBY SERVERS          │   │      GAME SHARDS (BedWars)      │    │
-│   │                              │   │                                  │    │
-│   │   Netty I/O ◀──▶ NMS Hooks  │   │   Netty I/O ◀──▶ NMS Hooks     │    │
-│   │        │              │      │   │        │              │          │    │
-│   │        ▼              ▼      │   │        ▼              ▼          │    │
-│   │   Main Thread ── Gameplay   │   │   Main Thread ── Game Logic     │    │
-│   │   (20 TPS tick)  (hub/cos)  │   │   (20 TPS tick)  (teams/score) │    │
-│   │                              │   │                                  │    │
-│   └─────────────────────────────┘   └─────────────────────────────────┘    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-              │                                    │
-              │  ┌──────────────────────────────┐  │
-              │  │   EXPLOIT-AWARE LAYER         │  │
-              │  │                               │  │
-              │  │   Packet Filters ──▶ Signals  │  │
-              │  │   (sanity, rate limits)        │  │
-              │  │            │                   │  │
-              │  │            ▼                   │  │
-              │  │   ──▶ Punishments              │  │
-              │  │                               │  │
-              │  └──────────────────────────────┘  │
-              │                                    │
-              ▼ enqueue                            ▼ enqueue
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        ASYNC LAYER (off-main thread)                        │
-│                                                                             │
-│   Executors (fixed pools, CF pipelines)                                     │
-│        │                                                                    │
-│        ├──▶ Storage Services ──▶ Redis / MongoDB / SQL / SlimeWorldManager  │
-│        │                          │              safe callback ▲              │
-│        │                          └──────────────────────────┘              │
-│        ├──▶ Messaging (fanout, pubsub) ──▶ Redis                            │
-│        │                                                                    │
-│        └──▶ Replay / Match Audit I/O ──▶ File Store                        │
-│                                           safe callback ▲                   │
-│                                    ────────────────────┘                    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           DATA PLANE                                        │
-│                                                                             │
-│   ┌──────────┐  ┌──────────────┐  ┌──────────────────┐  ┌────────────┐    │
-│   │  Redis   │  │ MongoDB/SQL  │  │ SlimeWorldManager│  │ File Store │    │
-│   │ cache    │  │ profiles     │  │ world templates  │  │ replays    │    │
-│   │ pubsub   │  │ stats        │  │ blobs            │  │ exports    │    │
-│   │ locks    │  │ economy      │  │                  │  │            │    │
-│   └──────────┘  └──────────────┘  └──────────────────┘  └────────────┘    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         OBSERVABILITY                                        │
-│                                                                             │
-│   Metrics (TPS, latency, pool saturation) ──▶ Alerts (thresholds, paging)  │
-│   Logs (structured, rotation)                                                │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+<table>
+<tr>
+<td width="50%">
+
+**Routing & Identity**
+Proxy Layer (BungeeCord / Velocity) — handles player routing, authentication, and server switching. Backend API (REST / WebSocket) serves the web panel and external integrations.
+
+</td>
+<td width="50%">
+
+**Game Servers**
+Lobby and Game Shard servers running Spigot/Paper 1.8.8. Each server maintains 20 TPS on the main thread while offloading I/O to dedicated async pools. NMS hooks handle packets, entities, combat, and TNT physics at the lowest level.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Security**
+Packet filters enforce sanity checks and rate limits on every incoming packet. Anti-cheat signals use heuristics to flag suspicious behavior, feeding directly into the punishment system. All hot-path code is allocation-free.
+
+</td>
+<td width="50%">
+
+**Data & Storage**
+Redis for cache, pubsub, and distributed locks. MongoDB/SQL for profiles, stats, and economy. SlimeWorldManager for world template blobs. All storage access runs off the main thread with safe callbacks.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Async Pipeline**
+Fixed-size thread pools and CompletableFuture pipelines handle storage, messaging, and replay I/O. The main thread never blocks — it enqueues work and receives results via scheduled callbacks.
+
+</td>
+</tr>
+</table>
 
 ---
 
