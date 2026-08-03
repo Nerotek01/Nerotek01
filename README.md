@@ -1,4 +1,6 @@
-````md
+این متن را دقیقاً داخل فایل `README.md` قرار بده (همه‌ی چیزی که داخل کادر است را کپی کن):
+
+````text
 <h1 align="center">Nerotek01</h1>
 
 <p align="center">
@@ -28,149 +30,127 @@ On the side, I read exploits the way some people read documentation. Understandi
 
 ```mermaid
 flowchart LR
-  %% =========================
-  %% Edge
-  %% =========================
-  clients["Players\nMinecraft Client 1.8.8"]
-  staff["Staff\nModeration Client"]
-  web["Web / Panel\nhypeland.org"]
+  Clients["Players\nMinecraft Client 1.8.8"]
+  Staff["Staff\nModeration Client"]
+  Web["Web / Panel\nhypeland.org"]
 
-  clients --> proxy
-  staff --> proxy
-  web --> api
+  Proxy["Proxy Layer\nBungeeCord / Velocity"]
+  API["Backend API\nREST / WebSocket"]
 
-  proxy["Proxy Layer\nBungeeCord / Velocity"]
-  api["Backend API\nREST, WebSocket"]
-
-  %% =========================
-  %% Control Plane
-  %% =========================
-  subgraph control["Control Plane (routing, identity, rules)"]
+  subgraph CONTROL["Control Plane (routing, identity, rules)"]
     direction TB
-    auth["Auth and Sessions\nlogin, tokens, ip rules"]
-    perms["Permissions\nranks, groups"]
-    mm["Matchmaker\nqueue, party, server selection"]
-    cfg["Config Service\nfeature flags, runtime toggles"]
-    punish["Punishments\nban, mute, blacklist"]
-    audit["Audit Stream\nsecurity events"]
-
-    api --> auth
-    api --> perms
-    api --> mm
-    api --> cfg
-    api --> punish
-    api --> audit
-
-    proxy <--> mm
-    proxy --> auth
+    Auth["Auth & Sessions\nlogin, tokens, ip rules"]
+    Perms["Permissions\nranks, groups"]
+    Match["Matchmaker\nqueue, party, routing"]
+    Config["Config Service\nfeature flags, runtime toggles"]
+    Punish["Punishments\nban, mute, blacklist"]
+    Audit["Audit Stream\nsecurity events"]
   end
 
-  %% =========================
-  %% Game Plane
-  %% =========================
-  subgraph game["Game Plane (Spigot/Paper 1.8.8)"]
-    direction LR
+  subgraph GAME["Game Plane (Spigot/Paper 1.8.8)"]
+    direction TB
 
-    subgraph lobby["Lobby Servers"]
-      direction TB
-      l_netty["Netty I/O\npacket ingress/egress"]
-      l_main["Main Thread\n20 TPS tick"]
-      l_nms["NMS Hooks\npackets, entities, physics"]
-      l_plugins["Gameplay\ncosmetics, hub features"]
+    subgraph LOBBY["Lobby Servers"]
+      direction LR
+      LobbyNetty["Netty I/O\npacket ingress/egress"]
+      LobbyMain["Main Thread\n20 TPS tick"]
+      LobbyPlugins["Gameplay\nhub features, cosmetics"]
+      LobbyNMS["NMS Hooks\npackets, entities, physics"]
 
-      l_netty --> l_nms
-      l_main --> l_plugins
-      l_plugins --> l_nms
+      LobbyMain --> LobbyPlugins --> LobbyNMS
+      LobbyNetty --> LobbyNMS
     end
 
-    subgraph shards["Game Shards (e.g., BedWars)"]
-      direction TB
-      g_netty["Netty I/O\npacket ingress/egress"]
-      g_main["Main Thread\n20 TPS tick"]
-      g_nms["NMS Hooks\ncombat, kb, TNT, packets"]
-      g_game["Game Logic\nmatches, teams, scoring"]
+    subgraph SHARDS["Game Shards (e.g., BedWars)"]
+      direction LR
+      ShardNetty["Netty I/O\npacket ingress/egress"]
+      ShardMain["Main Thread\n20 TPS tick"]
+      ShardLogic["Game Logic\nmatches, teams, scoring"]
+      ShardNMS["NMS Hooks\ncombat, kb, TNT, packets"]
 
-      g_netty --> g_nms
-      g_main --> g_game
-      g_game --> g_nms
+      ShardMain --> ShardLogic --> ShardNMS
+      ShardNetty --> ShardNMS
     end
   end
 
-  proxy --> lobby
-  proxy --> shards
-
-  %% =========================
-  %% Security / Exploit Layer
-  %% =========================
-  subgraph sec["Exploit-aware Layer (hot-path safe)"]
+  subgraph SECURITY["Exploit-aware Layer (hot-path safe)"]
     direction TB
-    pkt["Packet Filters\nrate limits, sanity checks"]
-    ac["Anti-cheat Signals\nheuristics, flags"]
+    PacketFilters["Packet Filters\nsanity checks, rate limits"]
+    Signals["Anti-cheat Signals\nheuristics, flags"]
   end
 
-  l_nms --> pkt
-  g_nms --> pkt
-  pkt --> ac
-  ac --> punish
-
-  %% =========================
-  %% Async Layer (off-main)
-  %% =========================
-  subgraph async["Async Layer (off-main thread)"]
+  subgraph ASYNC["Async Layer (off-main thread)"]
     direction TB
-    pools["Executors\nfixed pools, CF pipelines"]
-    storage["Storage Services\nDAOs, repositories"]
-    replay["Replay / Match Audit I/O\nstream writer"]
-    bus["Messaging\npubsub, fanout"]
-    pools --> storage
-    pools --> replay
-    pools --> bus
+    Pools["Executors\nfixed pools, CF pipelines"]
+    Storage["Storage Services\nDAOs, repositories"]
+    Messaging["Messaging\nfanout, pubsub"]
+    Replay["Replay / Match Audit I/O\nstream writer"]
+
+    Pools --> Storage
+    Pools --> Messaging
+    Pools --> Replay
   end
 
-  l_main -->|"enqueue work"| pools
-  g_main -->|"enqueue work"| pools
-
-  %% callbacks are controlled handoffs back to main thread
-  storage -->|"safe callback"| l_main
-  storage -->|"safe callback"| g_main
-  replay -->|"safe callback"| g_main
-
-  %% =========================
-  %% Data Plane
-  %% =========================
-  subgraph data["Data Plane"]
+  subgraph DATA["Data Plane"]
     direction TB
-    redis[("Redis\ncache, pubsub, locks")]
-    db[("MongoDB / SQL\nprofiles, stats, economy")]
-    swm[("SlimeWorldManager\nworld templates, blobs")]
-    files[("File Store\nreplays, exports")]
+    Redis[(Redis\ncache, pubsub, locks)]
+    DB[(MongoDB / SQL\nprofiles, stats, economy)]
+    SWM[(SlimeWorldManager\nworld templates, blobs)]
+    Files[(File Store\nreplays, exports)]
   end
 
-  storage --> db
-  storage --> redis
-  storage --> swm
-  replay --> files
-  bus --> redis
-
-  %% =========================
-  %% Observability
-  %% =========================
-  subgraph obs["Observability"]
+  subgraph OBS["Observability"]
     direction TB
-    metrics["Metrics\nTPS, latency, pool saturation"]
-    logs["Logs\nstructured, rotation"]
-    alerts["Alerts\nthresholds, paging"]
+    Metrics["Metrics\nTPS, latency, pool saturation"]
+    Logs["Logs\nstructured, rotation"]
+    Alerts["Alerts\nthresholds, paging"]
   end
 
-  l_main --> metrics
-  g_main --> metrics
-  pools --> metrics
+  Clients --> Proxy
+  Staff --> Proxy
+  Web --> API
 
-  l_main --> logs
-  g_main --> logs
-  api --> logs
+  API --> Auth
+  API --> Perms
+  API --> Match
+  API --> Config
+  API --> Punish
+  API --> Audit
 
-  metrics --> alerts
+  Proxy --> Match
+  Match --> Proxy
+  Proxy --> Auth
+
+  Proxy --> LobbyMain
+  Proxy --> ShardMain
+
+  LobbyNMS --> PacketFilters
+  ShardNMS --> PacketFilters
+  PacketFilters --> Signals
+  Signals --> Punish
+
+  LobbyMain -->|"enqueue"| Pools
+  ShardMain -->|"enqueue"| Pools
+
+  Storage --> Redis
+  Storage --> DB
+  Storage --> SWM
+  Messaging --> Redis
+  Replay --> Files
+
+  Storage -->|"safe callback"| LobbyMain
+  Storage -->|"safe callback"| ShardMain
+  Replay -->|"safe callback"| ShardMain
+
+  LobbyMain --> Metrics
+  ShardMain --> Metrics
+  Pools --> Metrics
+
+  API --> Logs
+  LobbyMain --> Logs
+  ShardMain --> Logs
+
+  Metrics --> Alerts
 ```
 
 ---
