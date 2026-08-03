@@ -27,80 +27,57 @@ On the side, I read exploits the way some people read documentation. Understandi
 
 ```mermaid
 flowchart LR
-  Clients["Players\nMinecraft Client 1.8.8"]
-  Staff["Staff\nModeration Client"]
-  Web["Web / Panel\nhypeland.org"]
+  Clients["Players - Minecraft Client 1.8.8"]
+  Staff["Staff - Moderation Client"]
+  Web["Web / Panel - hypeland.org"]
 
-  Proxy["Proxy Layer\nBungeeCord / Velocity"]
-  API["Backend API\nREST / WebSocket"]
+  Proxy["Proxy Layer - BungeeCord / Velocity"]
+  API["Backend API - REST / WebSocket"]
 
-  subgraph CONTROL["Control Plane (routing, identity, rules)"]
-    direction TB
-    Auth["Auth & Sessions\nlogin, tokens, ip rules"]
-    Perms["Permissions\nranks, groups"]
-    Match["Matchmaker\nqueue, party, routing"]
-    Config["Config Service\nfeature flags, runtime toggles"]
-    Punish["Punishments\nban, mute, blacklist"]
-    Audit["Audit Stream\nsecurity events"]
+  subgraph CONTROL["Control Plane"]
+    Auth["Auth & Sessions"]
+    Perms["Permissions"]
+    Match["Matchmaker"]
+    Config["Config Service"]
+    Punish["Punishments"]
+    Audit["Audit Stream"]
   end
 
-  subgraph GAME["Game Plane (Spigot/Paper 1.8.8)"]
-    direction TB
+  subgraph GAME["Game Plane - Spigot/Paper 1.8.8"]
+    LobbyNetty["Lobby Netty I/O"]
+    LobbyMain["Lobby Main Thread - 20 TPS"]
+    LobbyPlugins["Lobby Gameplay"]
+    LobbyNMS["Lobby NMS Hooks"]
 
-    subgraph LOBBY["Lobby Servers"]
-      direction LR
-      LobbyNetty["Netty I/O\npacket ingress/egress"]
-      LobbyMain["Main Thread\n20 TPS tick"]
-      LobbyPlugins["Gameplay\nhub features, cosmetics"]
-      LobbyNMS["NMS Hooks\npackets, entities, physics"]
-
-      LobbyMain --> LobbyPlugins --> LobbyNMS
-      LobbyNetty --> LobbyNMS
-    end
-
-    subgraph SHARDS["Game Shards (e.g., BedWars)"]
-      direction LR
-      ShardNetty["Netty I/O\npacket ingress/egress"]
-      ShardMain["Main Thread\n20 TPS tick"]
-      ShardLogic["Game Logic\nmatches, teams, scoring"]
-      ShardNMS["NMS Hooks\ncombat, kb, TNT, packets"]
-
-      ShardMain --> ShardLogic --> ShardNMS
-      ShardNetty --> ShardNMS
-    end
+    ShardNetty["Shard Netty I/O"]
+    ShardMain["Shard Main Thread - 20 TPS"]
+    ShardLogic["Shard Game Logic"]
+    ShardNMS["Shard NMS Hooks"]
   end
 
-  subgraph SECURITY["Exploit-aware Layer (hot-path safe)"]
-    direction TB
-    PacketFilters["Packet Filters\nsanity checks, rate limits"]
-    Signals["Anti-cheat Signals\nheuristics, flags"]
+  subgraph SECURITY["Exploit-aware Layer"]
+    PacketFilters["Packet Filters"]
+    Signals["Anti-cheat Signals"]
   end
 
-  subgraph ASYNC["Async Layer (off-main thread)"]
-    direction TB
-    Pools["Executors\nfixed pools, CF pipelines"]
-    Storage["Storage Services\nDAOs, repositories"]
-    Messaging["Messaging\nfanout, pubsub"]
-    Replay["Replay / Match Audit I/O\nstream writer"]
-
-    Pools --> Storage
-    Pools --> Messaging
-    Pools --> Replay
+  subgraph ASYNC["Async Layer"]
+    Pools["Executors"]
+    Storage["Storage Services"]
+    Messaging["Messaging"]
+    Replay["Replay / Match Audit"]
   end
 
   subgraph DATA["Data Plane"]
-    direction TB
-    Redis[(Redis\ncache, pubsub, locks)]
-    DB[(MongoDB / SQL\nprofiles, stats, economy)]
-    SWM[(SlimeWorldManager\nworld templates, blobs)]
-    Files[(File Store\nreplays, exports)]
+    Redis[("Redis")]
+    DB[("MongoDB / SQL")]
+    SWM[("SlimeWorldManager")]
+    Files[("File Store")]
   end
 
   subgraph OBS["Observability"]
-    direction TB
-    Metrics["Metrics\nTPS, latency, pool saturation"]
-    Logs["Logs\nstructured, rotation"]
-    Alerts["Alerts\nthresholds, paging"]
+    Metrics["Metrics"]
+    Logs["Logs"]
+    Alerts["Alerts"]
   end
 
   Clients --> Proxy
@@ -121,6 +98,12 @@ flowchart LR
   Proxy --> LobbyMain
   Proxy --> ShardMain
 
+  LobbyMain --> LobbyPlugins --> LobbyNMS
+  LobbyNetty --> LobbyNMS
+
+  ShardMain --> ShardLogic --> ShardNMS
+  ShardNetty --> ShardNMS
+
   LobbyNMS --> PacketFilters
   ShardNMS --> PacketFilters
   PacketFilters --> Signals
@@ -128,6 +111,10 @@ flowchart LR
 
   LobbyMain -->|"enqueue"| Pools
   ShardMain -->|"enqueue"| Pools
+
+  Pools --> Storage
+  Pools --> Messaging
+  Pools --> Replay
 
   Storage --> Redis
   Storage --> DB
