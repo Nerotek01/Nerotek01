@@ -15,11 +15,9 @@
 
 ### About
 
-I am a Java engineer specializing in high-performance Minecraft server infrastructure. My focus lies at the intersection of **Minestom**, **microservices architecture**, and **distributed systems** — designing server backends that scale horizontally, communicate asynchronously, and maintain sub-millisecond tick budgets under load.
+I am a Java engineer specializing in high-performance Minecraft server infrastructure. My focus lies at the intersection of **Minestom**, **microservices architecture**, and **distributed systems** — designing backends that scale horizontally, communicate asynchronously, and maintain sub-millisecond tick budgets under load.
 
-I approach infrastructure as an engineering discipline, not a configuration exercise. Every system I build is architected around **service isolation**, **state consistency across nodes**, and **resilient inter-service communication** via Redis pub/sub and message queues. The goal is not merely to run a server — it is to build a network that behaves predictably when thousands of players, dozens of game shards, and multiple backend services interact simultaneously.
-
-I read protocol implementations and concurrency internals the way some engineers read framework documentation. Understanding where a system breaks — and why — is the foundation of building one that does not.
+I treat infrastructure as an engineering discipline, not a configuration exercise. Every system I build is architected around **service isolation**, **state consistency across nodes**, and **resilient inter-service communication** via Redis pub/sub and message queues.
 
 ---
 
@@ -30,13 +28,13 @@ I read protocol implementations and concurrency internals the way some engineers
 <td width="50%">
 
 **Service Mesh & Communication**
-Distributed service topology built on Redis pub/sub and message queues. Each service (matchmaking, economy, party, replay) runs as an isolated unit with its own lifecycle. Inter-service communication is asynchronous by default, with explicit contracts and fallback strategies.
+Distributed service topology built on Redis pub/sub and message queues. Each service runs as an isolated unit with its own lifecycle. Inter-service communication is asynchronous by default, with explicit contracts and fallback strategies.
 
 </td>
 <td width="50%">
 
 **Game Server Layer**
-Minestom-based game shards running Java 25 with virtual threads. No Spigot compatibility layer — direct control over packet handling, entity ticking, and instance management. Each shard maintains consistent TPS while offloading all I/O to dedicated async executors.
+Minestom-based game shards running Java 25 with virtual threads. Direct control over packet handling, entity ticking, and instance management. Each shard maintains consistent TPS while offloading I/O to dedicated async executors.
 
 </td>
 </tr>
@@ -44,13 +42,13 @@ Minestom-based game shards running Java 25 with virtual threads. No Spigot compa
 <td width="50%">
 
 **State & Persistence**
-MongoDB for player profiles, stats, and economy data. Redis for caching, distributed locks, and cross-service event streams. All storage access is non-blocking, with MongoDB connection pooling and Redis pipeline batching to minimize round-trips.
+MongoDB for player profiles, stats, and economy data. Redis for caching, distributed locks, and cross-service event streams. All storage access is non-blocking, with connection pooling and pipeline batching.
 
 </td>
 <td width="50%">
 
 **Infrastructure & Orchestration**
-Dockerized service deployment with compose-based orchestration. Each microservice is containerized and independently scalable. Health checks, graceful shutdowns, and rolling updates are part of the deployment contract — not afterthoughts.
+Dockerized service deployment with compose-based orchestration. Each microservice is containerized and independently scalable. Health checks, graceful shutdowns, and rolling updates are part of the deployment contract.
 
 </td>
 </tr>
@@ -60,16 +58,7 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 
 ### Tech Stack
 
-**Languages — Proficiency & Practical Use**
-
-| Language | Level | Where I use it |
-|---|---|---|
-| **Java** | Expert | Core server logic, Minestom, virtual threads, microservices, high-performance concurrency |
-| **Kotlin** | Advanced | Backend services, DSLs, coroutines, tooling, Gradle plugins |
-| **Python** | Advanced | Automation, scripting, data analysis, quick prototypes, CI utilities |
-| **TypeScript** | Advanced | Tooling, dashboards, web APIs, internal admin panels |
-| **Go** | Proficient | Lightweight services, CLI tools, network utilities, sidecar processes |
-| **Rust** | Proficient | Performance-critical components, safe concurrency experiments, low-level tooling |
+**Languages**
 
 <p>
   <img src="https://img.shields.io/badge/Java-Expert-ED8B00?style=flat-square&logo=openjdk&logoColor=white"/>
@@ -116,15 +105,12 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 
 ### How I Work
 
-I treat infrastructure as a product: it must be observable, reproducible, and predictable under failure. My workflow is built around small, independently deployable services, explicit contracts, and automated verification. I prefer to measure before optimizing and to isolate failure domains before adding features.
-
 | Principle | In practice |
 |---|---|
-| **Service isolation by default** | Every microservice owns its data, exposes a clear contract, and fails independently. No shared mutable state across service boundaries. |
-| **Async-first communication** | Redis pub/sub, message queues, and virtual threads handle inter-service messaging. No blocking calls in hot paths — ever. |
-| **Minestom-native depth** | Direct control over packet flow, entity ticking, and instance management. No compatibility shims, no version-agnostic abstractions that hide the cost. |
-| **Operational resilience** | Services are containerized, health-checked, and designed for graceful shutdown. Redis pub/sub failures trigger fallback paths, not cascading outages. |
-| **Measure before optimizing** | I profile tick times, GC pauses, and network round-trips before changing architecture. Optimizations are validated under realistic load, not synthetic microbenchmarks. |
+| **Service isolation** | Every microservice owns its data, exposes a clear contract, and fails independently. |
+| **Async-first communication** | Redis pub/sub, message queues, and virtual threads handle inter-service messaging. No blocking calls in hot paths. |
+| **Minestom-native depth** | Direct control over packet flow, entity ticking, and instance management. No compatibility shims. |
+| **Operational resilience** | Services are containerized, health-checked, and designed for graceful shutdown. Failures trigger fallback paths, not cascading outages. |
 
 ---
 
