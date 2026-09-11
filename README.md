@@ -1,13 +1,13 @@
 <h1 align="center">Nerotek01</h1>
 
 <p align="center">
-  <em>Java engineer · Minecraft infrastructure · Founder of <a href="https://hypeland.org/">Hypeland</a></em>
+  <em>Java Engineer · High-Performance Minecraft Infrastructure · Minestom & Microservices</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
-  <img src="https://img.shields.io/badge/Focus-NMS%20%26%20Async-4A90D9?style=flat-square" alt="Focus"/>
-  <img src="https://img.shields.io/badge/Target-1.8.8%20Spigot%20%2F%20Paper-7B68EE?style=flat-square" alt="Target"/>
+  <img src="https://img.shields.io/badge/Java-25-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
+  <img src="https://img.shields.io/badge/Focus-Minestom%20%26%20Microservices-4A90D9?style=flat-square" alt="Focus"/>
+  <img src="https://img.shields.io/badge/Architecture-Distributed%20Systems-7B68EE?style=flat-square" alt="Architecture"/>
   <img src="https://img.shields.io/badge/Status-Available%20for%20work-2EA44F?style=flat-square" alt="Status"/>
 </p>
 
@@ -15,11 +15,11 @@
 
 ### About
 
-I am a Java developer who works where server internals, concurrency, and latency intersect. My specialty is the `net.minecraft.server` layer — packet interception, custom entity registration, TNT physics overrides, and low-level hooks that only make sense when you control the exact server version underneath them.
+I am a Java engineer specializing in high-performance Minecraft server infrastructure. My focus lies at the intersection of **Minestom**, **microservices architecture**, and **distributed systems** — designing server backends that scale horizontally, communicate asynchronously, and maintain sub-millisecond tick budgets under load.
 
-I treat performance as a design constraint, not a tuning phase. The systems I ship are built to hold thousands of concurrent players without dipping from 20 TPS, and to run for weeks without a restart. Async-first architecture, thread-isolated storage, and zero-allocation hot paths are the baseline, not the optimization.
+I approach infrastructure as an engineering discipline, not a configuration exercise. Every system I build is architected around **service isolation**, **state consistency across nodes**, and **resilient inter-service communication** via Redis pub/sub and message queues. The goal is not merely to run a server — it is to build a network that behaves predictably when thousands of players, dozens of game shards, and multiple backend services interact simultaneously.
 
-On the side, I read exploits the way some people read documentation. Understanding how a system breaks is the only honest way to build one that does not.
+I read protocol implementations and concurrency internals the way some engineers read framework documentation. Understanding where a system breaks — and why — is the foundation of building one that does not.
 
 ---
 
@@ -29,36 +29,28 @@ On the side, I read exploits the way some people read documentation. Understandi
 <tr>
 <td width="50%">
 
-**Routing & Identity**
-Proxy Layer (BungeeCord / Velocity) — handles player routing, authentication, and server switching. Backend API (REST / WebSocket) serves the web panel and external integrations.
+**Service Mesh & Communication**
+Distributed service topology built on Redis pub/sub and message queues. Each service (matchmaking, economy, party, replay) runs as an isolated unit with its own lifecycle. Inter-service communication is asynchronous by default, with explicit contracts and fallback strategies.
 
 </td>
 <td width="50%">
 
-**Game Servers**
-Lobby and Game Shard servers running Spigot/Paper 1.8.8. Each server maintains 20 TPS on the main thread while offloading I/O to dedicated async pools. NMS hooks handle packets, entities, combat, and TNT physics at the lowest level.
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**Security**
-Packet filters enforce sanity checks and rate limits on every incoming packet. Anti-cheat signals use heuristics to flag suspicious behavior, feeding directly into the punishment system. All hot-path code is allocation-free.
-
-</td>
-<td width="50%">
-
-**Data & Storage**
-Redis for cache, pubsub, and distributed locks. MongoDB/SQL for profiles, stats, and economy. SlimeWorldManager for world template blobs. All storage access runs off the main thread with safe callbacks.
+**Game Server Layer**
+Minestom-based game shards running Java 25 with virtual threads. No Spigot compatibility layer — direct control over packet handling, entity ticking, and instance management. Each shard maintains consistent TPS while offloading all I/O to dedicated async executors.
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-**Async Pipeline**
-Fixed-size thread pools and CompletableFuture pipelines handle storage, messaging, and replay I/O. The main thread never blocks — it enqueues work and receives results via scheduled callbacks.
+**State & Persistence**
+MongoDB for player profiles, stats, and economy data. Redis for caching, distributed locks, and cross-service event streams. All storage access is non-blocking, with MongoDB connection pooling and Redis pipeline batching to minimize round-trips.
+
+</td>
+<td width="50%">
+
+**Infrastructure & Orchestration**
+Dockerized service deployment with compose-based orchestration. Each microservice is containerized and independently scalable. Health checks, graceful shutdowns, and rolling updates are part of the deployment contract — not afterthoughts.
 
 </td>
 </tr>
@@ -75,56 +67,40 @@ Fixed-size thread pools and CompletableFuture pipelines handle storage, messagin
   <img src="https://img.shields.io/badge/Kotlin-Advanced-7F52FF?style=flat-square&logo=kotlin&logoColor=white"/>
   <img src="https://img.shields.io/badge/Python-Advanced-3776AB?style=flat-square&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/TypeScript-Advanced-3178C6?style=flat-square&logo=typescript&logoColor=white"/>
-  <img src="https://img.shields.io/badge/JavaScript-Advanced-F7DF1E?style=flat-square&logo=javascript&logoColor=black"/>
   <img src="https://img.shields.io/badge/Go-Proficient-00ADD8?style=flat-square&logo=go&logoColor=white"/>
   <img src="https://img.shields.io/badge/Rust-Proficient-000000?style=flat-square&logo=rust&logoColor=white"/>
-  <img src="https://img.shields.io/badge/C%2B%2B-Proficient-00599C?style=flat-square&logo=c%2B%2B&logoColor=white"/>
-  <img src="https://img.shields.io/badge/C-Proficient-A8B9CC?style=flat-square&logo=c&logoColor=black"/>
-  <img src="https://img.shields.io/badge/C%23-Proficient-239120?style=flat-square&logo=csharp&logoColor=white"/>
-  <img src="https://img.shields.io/badge/PHP-Proficient-777BB4?style=flat-square&logo=php&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Shell-Advanced-4EAA25?style=flat-square&logo=gnubash&logoColor=white"/>
-  <img src="https://img.shields.io/badge/SQL-Advanced-4479A1?style=flat-square&logo=postgresql&logoColor=white"/>
 </p>
 
-**Minecraft Ecosystem**
+**Minecraft Server Engineering**
 
 <p>
-  <img src="https://img.shields.io/badge/Spigot%20%2F%20Paper-1.8.8-7B68EE?style=flat-square"/>
-  <img src="https://img.shields.io/badge/BungeeCord-2DA67B?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Velocity-1B1B1B?style=flat-square"/>
-  <img src="https://img.shields.io/badge/NMS%20Hooks-181717?style=flat-square"/>
-  <img src="https://img.shields.io/badge/SlimeWorldManager-6D4AFF?style=flat-square"/>
-  <img src="https://img.shields.io/badge/PlaceholderAPI-2EA44F?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Citizens-7B68EE?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Packet%20Interception-181717?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Minestom-Expert-6D4AFF?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Java%2025%20Virtual%20Threads-Expert-ED8B00?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Microservices-Expert-4A90D9?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Distributed%20Systems-Expert-7B68EE?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Packet%20Handling-Advanced-181717?style=flat-square"/>
+  <img src="https://img.shields.io/badge/World%20Management-Advanced-2EA44F?style=flat-square"/>
 </p>
 
-**Databases & Caching**
+**Data & Messaging**
 
 <p>
   <img src="https://img.shields.io/badge/MongoDB-Expert-47A248?style=flat-square&logo=mongodb&logoColor=white"/>
   <img src="https://img.shields.io/badge/Redis-Expert-DC382D?style=flat-square&logo=redis&logoColor=white"/>
-  <img src="https://img.shields.io/badge/SQLite-Expert-003B57?style=flat-square&logo=sqlite&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Redis%20Pub%2FSub-Expert-DC382D?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Message%20Queues-Advanced-4A90D9?style=flat-square"/>
   <img src="https://img.shields.io/badge/MySQL-Advanced-4479A1?style=flat-square&logo=mysql&logoColor=white"/>
   <img src="https://img.shields.io/badge/PostgreSQL-Advanced-4169E1?style=flat-square&logo=postgresql&logoColor=white"/>
-  <img src="https://img.shields.io/badge/MariaDB-Advanced-003545?style=flat-square&logo=mariadb&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Cassandra-Proficient-1287B1?style=flat-square&logo=apachecassandra&logoColor=white"/>
 </p>
 
-**Backend, Frontend & DevOps**
+**Infrastructure & DevOps**
 
 <p>
-  <img src="https://img.shields.io/badge/Node.js-Advanced-339933?style=flat-square&logo=nodedotjs&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Next.js-Advanced-000000?style=flat-square&logo=next.js&logoColor=white"/>
-  <img src="https://img.shields.io/badge/React-Advanced-61DAFB?style=flat-square&logo=react&logoColor=black"/>
-  <img src="https://img.shields.io/badge/TailwindCSS-Advanced-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Docker-Proficient-2496ED?style=flat-square&logo=docker&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Docker-Advanced-2496ED?style=flat-square&logo=docker&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Docker%20Compose-Advanced-2496ED?style=flat-square&logo=docker&logoColor=white"/>
   <img src="https://img.shields.io/badge/Linux-Advanced-FCC624?style=flat-square&logo=linux&logoColor=black"/>
-  <img src="https://img.shields.io/badge/Git-Expert-F05032?style=flat-square&logo=git&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Maven-Advanced-C71A36?style=flat-square&logo=apachemaven&logoColor=white"/>
   <img src="https://img.shields.io/badge/Gradle-Advanced-02303A?style=flat-square&logo=gradle&logoColor=white"/>
-  <img src="https://img.shields.io/badge/WebSocket-Advanced-4A90D9?style=flat-square"/>
-  <img src="https://img.shields.io/badge/REST%20API-Advanced-2EA44F?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Git-Expert-F05032?style=flat-square&logo=git&logoColor=white"/>
 </p>
 
 ---
@@ -133,17 +109,17 @@ Fixed-size thread pools and CompletableFuture pipelines handle storage, messagin
 
 | Principle | In practice |
 |---|---|
-| Async by default | Storage, network, and replay I/O run on dedicated pools — the main thread never waits. |
-| Single-version depth | One Minecraft version means one test surface. NMS hooks stay precise; nothing is layered behind a compatibility shim. |
-| Exploit-aware design | Listeners register only for active features. Collections use `ConcurrentHashMap` with explicit cleanup. Hot paths are allocation-free. |
-| Stability over scope | A server should not need a restart for weeks. Memory leaks and TPS drift are treated as bugs, not background noise. |
+| **Service isolation by default** | Every microservice owns its data, exposes a clear contract, and fails independently. No shared mutable state across service boundaries. |
+| **Async-first communication** | Redis pub/sub, message queues, and virtual threads handle inter-service messaging. No blocking calls in hot paths — ever. |
+| **Minestom-native depth** | Direct control over packet flow, entity ticking, and instance management. No compatibility shims, no version-agnostic abstractions that hide the cost. |
+| **Operational resilience** | Services are containerized, health-checked, and designed for graceful shutdown. Redis pub/sub failures trigger fallback paths, not cascading outages. |
 
 ---
 
 ### Notable Work
 
-- **BedWars** — a production-grade plugin for 1.8.8 networks, battle-tested at 2,000+ concurrent players. See [Nerotek01/BedWars](https://github.com/Nerotek01/BedWars).
-- **Hypeland** — my reference deployment, where every change is validated under real load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/) and `mc.hypeland.org`.
+- **HypixelRecreation** — a Minestom-based, microservices-architected recreation of Hypixel with distributed game shards, Redis-backed inter-service messaging, and MongoDB persistence. Active at [Swofty-Developments/HypixelRecreation](https://github.com/Swofty-Developments/HypixelRecreation).
+- **Hypeland** — my reference deployment, where every architectural change is validated under real player load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/) and `mc.hypeland.org`.
 
 ---
 
