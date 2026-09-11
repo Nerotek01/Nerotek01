@@ -17,6 +17,8 @@
 
 I am a Java engineer specializing in high-performance Minecraft server infrastructure. My focus lies at the intersection of **Minestom**, **microservices architecture**, and **distributed systems** — designing backends that scale horizontally, communicate asynchronously, and maintain sub-millisecond tick budgets under load.
 
+This kind of architecture is typically found only in very large server networks such as hypixel.net.
+
 I treat infrastructure as an engineering discipline, not a configuration exercise. Every system I build is architected around **service isolation**, **state consistency across nodes**, and **resilient inter-service communication** via Redis pub/sub and message queues.
 
 ---
