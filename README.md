@@ -60,7 +60,16 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 
 ### Tech Stack
 
-**Languages**
+**Languages — Proficiency & Practical Use**
+
+| Language | Level | Where I use it |
+|---|---|---|
+| **Java** | Expert | Core server logic, Minestom, virtual threads, microservices, high-performance concurrency |
+| **Kotlin** | Advanced | Backend services, DSLs, coroutines, tooling, Gradle plugins |
+| **Python** | Advanced | Automation, scripting, data analysis, quick prototypes, CI utilities |
+| **TypeScript** | Advanced | Tooling, dashboards, web APIs, internal admin panels |
+| **Go** | Proficient | Lightweight services, CLI tools, network utilities, sidecar processes |
+| **Rust** | Proficient | Performance-critical components, safe concurrency experiments, low-level tooling |
 
 <p>
   <img src="https://img.shields.io/badge/Java-Expert-ED8B00?style=flat-square&logo=openjdk&logoColor=white"/>
@@ -107,18 +116,20 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 
 ### How I Work
 
+I treat infrastructure as a product: it must be observable, reproducible, and predictable under failure. My workflow is built around small, independently deployable services, explicit contracts, and automated verification. I prefer to measure before optimizing and to isolate failure domains before adding features.
+
 | Principle | In practice |
 |---|---|
 | **Service isolation by default** | Every microservice owns its data, exposes a clear contract, and fails independently. No shared mutable state across service boundaries. |
 | **Async-first communication** | Redis pub/sub, message queues, and virtual threads handle inter-service messaging. No blocking calls in hot paths — ever. |
 | **Minestom-native depth** | Direct control over packet flow, entity ticking, and instance management. No compatibility shims, no version-agnostic abstractions that hide the cost. |
 | **Operational resilience** | Services are containerized, health-checked, and designed for graceful shutdown. Redis pub/sub failures trigger fallback paths, not cascading outages. |
+| **Measure before optimizing** | I profile tick times, GC pauses, and network round-trips before changing architecture. Optimizations are validated under realistic load, not synthetic microbenchmarks. |
 
 ---
 
-### Notable Work
+### Selected Work
 
-- **HypixelRecreation** — a Minestom-based, microservices-architected recreation of Hypixel with distributed game shards, Redis-backed inter-service messaging, and MongoDB persistence. Active at [Swofty-Developments/HypixelRecreation](https://github.com/Swofty-Developments/HypixelRecreation).
 - **Hypeland** — my reference deployment, where every architectural change is validated under real player load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/) and `mc.hypeland.org`.
 
 ---
