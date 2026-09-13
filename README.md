@@ -21,6 +21,11 @@ This kind of architecture is typically found only in very large server networks 
 
 I treat infrastructure as an engineering discipline, not a configuration exercise. Every system I build is architected around **service isolation**, **state consistency across nodes**, and **resilient inter-service communication** via Redis pub/sub and message queues.
 
+> **Note on scale and accessibility**  
+> This style is intended for large-scale projects and server networks — it operates on a completely different level.  
+> It does **not** require paid, proprietary, or extremely powerful software.  
+> Everything is tunable to an extreme degree: you can adjust parameters down to `0.00000000000001` or similar precision, giving you full control without expensive dependencies.
+
 ---
 
 ### System Overview
@@ -119,6 +124,18 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 ### Selected Work
 
 - **Hypeland** — my reference deployment, where every architectural change is validated under real player load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/) and `mc.hypeland.org`.
+
+---
+
+### Curiosity Hooks (Why This Matters)
+
+- **Sub-millisecond tick budgets** — how do you keep thousands of entities updating without ever missing a tick?
+- **Virtual threads on Java 25** — what changes when you can spawn millions of lightweight threads for I/O without blocking the main game loop?
+- **Redis pub/sub as a nervous system** — how do you keep dozens of independent services in sync without a central bottleneck?
+- **State consistency across nodes** — what happens when a player switches shards mid-action? No duplication, no loss.
+- **Graceful shutdown as a contract** — rolling updates without dropping a single player connection.
+- **Everything is tunable** — from thread pool sizes to network timeouts, you can dial precision down to `0.00000000000001` if you need to.
+- **No paid software required** — this entire stack runs on open-source tools. The complexity is in the architecture, not the license fees.
 
 ---
 
