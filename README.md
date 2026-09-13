@@ -127,15 +127,14 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 
 ---
 
-### Curiosity Hooks (Why This Matters)
+### Why This Demands Expertise
 
-- **Sub-millisecond tick budgets** — how do you keep thousands of entities updating without ever missing a tick?
-- **Virtual threads on Java 25** — what changes when you can spawn millions of lightweight threads for I/O without blocking the main game loop?
-- **Redis pub/sub as a nervous system** — how do you keep dozens of independent services in sync without a central bottleneck?
-- **State consistency across nodes** — what happens when a player switches shards mid-action? No duplication, no loss.
-- **Graceful shutdown as a contract** — rolling updates without dropping a single player connection.
-- **Everything is tunable** — from thread pool sizes to network timeouts, you can dial precision down to `0.00000000000001` if you need to.
-- **No paid software required** — this entire stack runs on open-source tools. The complexity is in the architecture, not the license fees.
+- **Sub-millisecond tick budgets** — keeping thousands of entities in sync without a single missed tick.
+- **Virtual threads on Java 25** — massive I/O concurrency without stalling the game loop.
+- **Redis pub/sub & state consistency** — cross-shard player transitions with zero duplication or loss.
+- **Graceful shutdown as a contract** — rolling updates that never drop a connection.
+
+> This architecture is not plug-and-play. It requires a true specialist. A single misconfiguration in threading, state, or messaging can cascade and bring the entire network down.
 
 ---
 
