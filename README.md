@@ -1,12 +1,12 @@
 <h1 align="center">Nerotek01</h1>
 
 <p align="center">
-  <em>Java Engineer · High-Performance Minecraft Infrastructure · Minestom & Microservices</em>
+  <em>Java Engineer · High-Performance Backend Systems · Microservices & Distributed Architecture</em>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-25-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
-  <img src="https://img.shields.io/badge/Focus-Minestom%20%26%20Microservices-4A90D9?style=flat-square" alt="Focus"/>
+  <img src="https://img.shields.io/badge/Focus-Microservices-4A90D9?style=flat-square" alt="Focus"/>
   <img src="https://img.shields.io/badge/Architecture-Distributed%20Systems-7B68EE?style=flat-square" alt="Architecture"/>
   <img src="https://img.shields.io/badge/Status-Available%20for%20work-2EA44F?style=flat-square" alt="Status"/>
 </p>
@@ -15,14 +15,14 @@
 
 ### About
 
-I am a Java engineer specializing in high-performance Minecraft server infrastructure. My focus lies at the intersection of **Minestom**, **microservices architecture**, and **distributed systems** — designing backends that scale horizontally, communicate asynchronously, and maintain sub-millisecond tick budgets under load.
+I am a Java engineer specializing in high-performance backend infrastructure. My focus lies at the intersection of **microservices architecture**, **asynchronous messaging**, and **distributed systems** — designing backends that scale horizontally, communicate asynchronously, and maintain sub-millisecond latency budgets under sustained load.
 
-This kind of architecture is typically found only in very large server networks such as hypixel.net.
+This kind of architecture is typically found only in very large production networks that demand strict service isolation and predictable performance at scale.
 
 I treat infrastructure as an engineering discipline, not a configuration exercise. Every system I build is architected around **service isolation**, **state consistency across nodes**, and **resilient inter-service communication** via Redis pub/sub and message queues.
 
 > **Note on scale and accessibility**  
-> This style is intended for large-scale projects and server networks — it operates on a completely different level.  
+> This style is intended for large-scale projects and production networks — it operates on a completely different level.  
 > It does **not** require paid, proprietary, or extremely powerful software.  
 > Everything is tunable to an extreme degree: you can adjust parameters down to `0.00000000000001` or similar precision, giving you full control without expensive dependencies.
 
@@ -40,8 +40,8 @@ Distributed service topology built on Redis pub/sub and message queues. Each ser
 </td>
 <td width="50%">
 
-**Game Server Layer**
-Minestom-based game shards running Java 25 with virtual threads. Direct control over packet handling, entity ticking, and instance management. Each shard maintains consistent TPS while offloading I/O to dedicated async executors.
+**Application Layer**
+Java 25 services leveraging virtual threads for massive I/O concurrency. Direct control over request handling, workload scheduling, and instance management. Each node maintains consistent throughput while offloading I/O to dedicated async executors.
 
 </td>
 </tr>
@@ -49,7 +49,7 @@ Minestom-based game shards running Java 25 with virtual threads. Direct control 
 <td width="50%">
 
 **State & Persistence**
-MongoDB for player profiles, stats, and economy data. Redis for caching, distributed locks, and cross-service event streams. All storage access is non-blocking, with connection pooling and pipeline batching.
+MongoDB for user profiles, records, and transactional data. Redis for caching, distributed locks, and cross-service event streams. All storage access is non-blocking, with connection pooling and pipeline batching.
 
 </td>
 <td width="50%">
@@ -76,15 +76,15 @@ Dockerized service deployment with compose-based orchestration. Each microservic
   <img src="https://img.shields.io/badge/Rust-Proficient-000000?style=flat-square&logo=rust&logoColor=white"/>
 </p>
 
-**Minecraft Server Engineering**
+**Backend Engineering**
 
 <p>
-  <img src="https://img.shields.io/badge/Minestom-Expert-6D4AFF?style=flat-square"/>
   <img src="https://img.shields.io/badge/Java%2025%20Virtual%20Threads-Expert-ED8B00?style=flat-square"/>
   <img src="https://img.shields.io/badge/Microservices-Expert-4A90D9?style=flat-square"/>
   <img src="https://img.shields.io/badge/Distributed%20Systems-Expert-7B68EE?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Packet%20Handling-Advanced-181717?style=flat-square"/>
-  <img src="https://img.shields.io/badge/World%20Management-Advanced-2EA44F?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Async%20I%2FO-Expert-181717?style=flat-square"/>
+  <img src="https://img.shields.io/badge/API%20Design-Advanced-2EA44F?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Performance%20Tuning-Advanced-6D4AFF?style=flat-square"/>
 </p>
 
 **Data & Messaging**
@@ -116,22 +116,22 @@ Dockerized service deployment with compose-based orchestration. Each microservic
 |---|---|
 | **Service isolation** | Every microservice owns its data, exposes a clear contract, and fails independently. |
 | **Async-first communication** | Redis pub/sub, message queues, and virtual threads handle inter-service messaging. No blocking calls in hot paths. |
-| **Minestom-native depth** | Direct control over packet flow, entity ticking, and instance management. No compatibility shims. |
+| **Deep backend control** | Direct control over request flow, workload scheduling, and instance management. No unnecessary abstraction layers. |
 | **Operational resilience** | Services are containerized, health-checked, and designed for graceful shutdown. Failures trigger fallback paths, not cascading outages. |
 
 ---
 
 ### Selected Work
 
-- **Hypeland** — my reference deployment, where every architectural change is validated under real player load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/) and `mc.hypeland.org`.
+- **Hypeland** — my reference deployment, where every architectural change is validated under real production load before it ships anywhere else. Live at [hypeland.org](https://hypeland.org/).
 
 ---
 
 ### Why This Demands Expertise
 
-- **Sub-millisecond tick budgets** — keeping thousands of entities in sync without a single missed tick.
-- **Virtual threads on Java 25** — massive I/O concurrency without stalling the game loop.
-- **Redis pub/sub & state consistency** — cross-shard player transitions with zero duplication or loss.
+- **Sub-millisecond latency budgets** — keeping thousands of concurrent operations in sync without a single missed deadline.
+- **Virtual threads on Java 25** — massive I/O concurrency without stalling the main execution loop.
+- **Redis pub/sub & state consistency** — cross-node transitions with zero duplication or loss.
 - **Graceful shutdown as a contract** — rolling updates that never drop a connection.
 
 > This architecture is not plug-and-play. It requires a true specialist. A single misconfiguration in threading, state, or messaging can cascade and bring the entire network down.
@@ -147,5 +147,4 @@ Dockerized service deployment with compose-based orchestration. Each microservic
   <a href="https://hypeland.org/">
     <img src="https://img.shields.io/badge/Web-hypeland.org-2EA44F?style=flat-square&logo=googlechrome&logoColor=white"/>
   </a>
-  <img src="https://img.shields.io/badge/Minecraft-mc.hypeland.org-7B68EE?style=flat-square&logo=minecraft&logoColor=white"/>
 </p>
